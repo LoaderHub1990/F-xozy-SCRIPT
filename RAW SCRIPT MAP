@@ -1,0 +1,428 @@
+local TweenService = game:GetService("TweenService")
+local Players = game:GetService("Players")
+local HttpService = game:GetService("HttpService")
+local MarketplaceService = game:GetService("MarketplaceService")
+
+local Player = Players.LocalPlayer
+local PlayerGui = Player:WaitForChild("PlayerGui")
+
+local SERVER_URL = "https://synxluadernyz.wisp.uno/nexus-runner"
+local NEXUS_SECRET = "LUADER"
+local WEBSITE_NAME = "Flexozy"
+
+local SCRIPTS = {
+    [142823291] = {
+        Name = "MM2",
+        URL = "https://raw.githubusercontent.com/LoaderHub1990/Script-all/refs/heads/main/SRC%20MM2"
+    },
+
+    [93978595733734] = {
+        Name = "ViolenceDistrict",
+        URL = "https://raw.githubusercontent.com/LoaderHub1990/OBF-SCRIPT-ALL/refs/heads/main/F!exozy%20ViolenceDistrict"
+    },
+
+    [4924922222] = {
+        Name = "BoomBox Brookhaven RP",
+        URL = "https://raw.githubusercontent.com/LoaderHub1990/OBF-SCRIPT-ALL/refs/heads/main/F!exozy%20BoomBox%20Brookhaven%20RP"
+    },
+
+    [537413528] = {
+        Name = "Build a boat",
+        URL = "https://raw.githubusercontent.com/LoaderHub1990/OBF-SCRIPT-ALL/refs/heads/main/F!exozy%20Build%20a%20boat"
+    },
+
+    [4503309821] = {
+        Name = "City Thailand 2 Auto sell",
+        URL = "https://raw.githubusercontent.com/LoaderHub1990/OBF-SCRIPT-ALL/refs/heads/main/F!exozy%20City%20Thailand%202%20Auto%20sell"
+    },
+
+    DEFAULT = {
+        Name = "ALL MENU",
+        URL = "https://raw.githubusercontent.com/LoaderHub1990/OBF-SCRIPT-ALL/refs/heads/main/ALL%20MENU%20OBF%20V2"
+    }
+}
+
+local CurrentScript = SCRIPTS[game.PlaceId] or SCRIPTS.DEFAULT
+local SCRIPT_NAME = CurrentScript.Name
+local LOAD_URL = CurrentScript.URL
+
+local PlaceName = tostring(game.PlaceId)
+
+pcall(function()
+    local Info = MarketplaceService:GetProductInfo(game.PlaceId)
+
+    if Info and Info.Name then
+        PlaceName = Info.Name
+    end
+end)
+
+local function GetRunner()
+    local Runner = "Unknown"
+
+    pcall(function()
+        if typeof(identifyexecutor) == "function" then
+            local Name, Version = identifyexecutor()
+
+            if Name and tostring(Name) ~= "" then
+                Runner = tostring(Name)
+
+                if Version and tostring(Version) ~= "" then
+                    Runner = Runner .. " " .. tostring(Version)
+                end
+            end
+        end
+    end)
+
+    if Runner == "Unknown" then
+        pcall(function()
+            if typeof(getexecutorname) == "function" then
+                local Name = getexecutorname()
+
+                if Name and tostring(Name) ~= "" then
+                    Runner = tostring(Name)
+                end
+            end
+        end)
+    end
+
+    if Runner == "Unknown" then
+        pcall(function()
+            if syn and typeof(syn.getexecutorname) == "function" then
+                local Name = syn.getexecutorname()
+
+                if Name and tostring(Name) ~= "" then
+                    Runner = tostring(Name)
+                end
+            end
+        end)
+    end
+
+    return Runner
+end
+
+local function GetRequestFunction()
+    if typeof(request) == "function" then
+        return request
+    end
+
+    if typeof(http_request) == "function" then
+        return http_request
+    end
+
+    if syn and typeof(syn.request) == "function" then
+        return syn.request
+    end
+
+    if http and typeof(http.request) == "function" then
+        return http.request
+    end
+
+    return nil
+end
+
+local function SendNexusData()
+    local RequestFunction = GetRequestFunction()
+
+    if not RequestFunction then
+        return false
+    end
+
+    local Runner = GetRunner()
+
+    local Data = {
+        userId = tostring(Player.UserId),
+        username = tostring(Player.Name),
+        placeId = tostring(game.PlaceId),
+        placeName = tostring(PlaceName),
+        playerCount = #Players:GetPlayers(),
+        runner = tostring(Runner),
+        scriptName = tostring(SCRIPT_NAME),
+        website = tostring(WEBSITE_NAME)
+    }
+
+    local Success = pcall(function()
+        local Response = RequestFunction({
+            Url = SERVER_URL,
+            Method = "POST",
+
+            Headers = {
+                ["Content-Type"] = "application/json",
+                ["x-secret"] = NEXUS_SECRET
+            },
+
+            Body = HttpService:JSONEncode(Data)
+        })
+
+        return Response
+    end)
+
+    return Success
+end
+
+task.spawn(function()
+    task.wait(0.2)
+    SendNexusData()
+end)
+
+local OldGui = PlayerGui:FindFirstChild("HubLoader")
+
+if OldGui then
+    OldGui:Destroy()
+end
+
+local ScreenGui = Instance.new("ScreenGui")
+ScreenGui.Name = "HubLoader"
+ScreenGui.ResetOnSpawn = false
+ScreenGui.DisplayOrder = 999
+ScreenGui.IgnoreGuiInset = true
+ScreenGui.Parent = PlayerGui
+
+local Frame = Instance.new("Frame")
+Frame.Name = "Background"
+Frame.Size = UDim2.fromScale(1, 1)
+Frame.Position = UDim2.fromScale(0, 0)
+Frame.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+Frame.BackgroundTransparency = 1
+Frame.BorderSizePixel = 0
+Frame.Parent = ScreenGui
+
+local Logo = Instance.new("ImageLabel")
+Logo.Name = "Logo"
+Logo.AnchorPoint = Vector2.new(0.5, 0.5)
+Logo.Size = UDim2.fromOffset(180, 180)
+Logo.Position = UDim2.fromScale(0.5, 0.5)
+Logo.BackgroundTransparency = 1
+Logo.Image = "rbxassetid://71098406459023"
+Logo.ImageTransparency = 1
+Logo.ScaleType = Enum.ScaleType.Fit
+Logo.ZIndex = 2
+Logo.Parent = Frame
+
+local MapLabel = Instance.new("TextLabel")
+MapLabel.Name = "MapName"
+MapLabel.AnchorPoint = Vector2.new(0.5, 0)
+MapLabel.Size = UDim2.fromOffset(700, 40)
+MapLabel.Position = UDim2.new(0.5, 0, 0.5, 105)
+MapLabel.BackgroundTransparency = 1
+MapLabel.Text = PlaceName
+MapLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+MapLabel.TextTransparency = 1
+MapLabel.Font = Enum.Font.GothamBold
+MapLabel.TextSize = 20
+MapLabel.TextXAlignment = Enum.TextXAlignment.Center
+MapLabel.ZIndex = 3
+MapLabel.Parent = Frame
+
+local ScriptLabel = Instance.new("TextLabel")
+ScriptLabel.Name = "ScriptName"
+ScriptLabel.AnchorPoint = Vector2.new(0.5, 0)
+ScriptLabel.Size = UDim2.fromOffset(700, 30)
+ScriptLabel.Position = UDim2.new(0.5, 0, 0.5, 140)
+ScriptLabel.BackgroundTransparency = 1
+ScriptLabel.Text = "Script: " .. SCRIPT_NAME
+ScriptLabel.TextColor3 = Color3.fromRGB(190, 190, 190)
+ScriptLabel.TextTransparency = 1
+ScriptLabel.Font = Enum.Font.Gotham
+ScriptLabel.TextSize = 14
+ScriptLabel.TextXAlignment = Enum.TextXAlignment.Center
+ScriptLabel.ZIndex = 3
+ScriptLabel.Parent = Frame
+
+local WebsiteLabel = Instance.new("TextLabel")
+WebsiteLabel.Name = "Website"
+WebsiteLabel.AnchorPoint = Vector2.new(0.5, 0)
+WebsiteLabel.Size = UDim2.fromOffset(700, 25)
+WebsiteLabel.Position = UDim2.new(0.5, 0, 0.5, 165)
+WebsiteLabel.BackgroundTransparency = 1
+WebsiteLabel.Text = WEBSITE_NAME
+WebsiteLabel.TextColor3 = Color3.fromRGB(130, 130, 130)
+WebsiteLabel.TextTransparency = 1
+WebsiteLabel.Font = Enum.Font.Gotham
+WebsiteLabel.TextSize = 12
+WebsiteLabel.TextXAlignment = Enum.TextXAlignment.Center
+WebsiteLabel.ZIndex = 3
+WebsiteLabel.Parent = Frame
+
+local function LoadScript(URL)
+    if not URL or URL == "" then
+        return false
+    end
+
+    local Success = pcall(function()
+        local Source = game:HttpGet(URL, true)
+
+        if not Source or Source == "" then
+            error("Script source is empty")
+        end
+
+        if typeof(loadstring) ~= "function" then
+            error("loadstring is not supported")
+        end
+
+        local LoadedFunction, CompileError = loadstring(Source)
+
+        if not LoadedFunction then
+            error(CompileError or "Compile failed")
+        end
+
+        LoadedFunction()
+    end)
+
+    return Success
+end
+
+local function ShowLoader()
+    local BackgroundIn = TweenService:Create(
+        Frame,
+        TweenInfo.new(
+            0.35,
+            Enum.EasingStyle.Quad,
+            Enum.EasingDirection.Out
+        ),
+        {
+            BackgroundTransparency = 0
+        }
+    )
+
+    BackgroundIn:Play()
+    BackgroundIn.Completed:Wait()
+
+    task.wait(0.1)
+
+    local LogoIn = TweenService:Create(
+        Logo,
+        TweenInfo.new(
+            1,
+            Enum.EasingStyle.Back,
+            Enum.EasingDirection.Out
+        ),
+        {
+            ImageTransparency = 0,
+            Size = UDim2.fromOffset(220, 220)
+        }
+    )
+
+    local MapIn = TweenService:Create(
+        MapLabel,
+        TweenInfo.new(
+            0.8,
+            Enum.EasingStyle.Quad,
+            Enum.EasingDirection.Out
+        ),
+        {
+            TextTransparency = 0
+        }
+    )
+
+    local ScriptIn = TweenService:Create(
+        ScriptLabel,
+        TweenInfo.new(
+            0.8,
+            Enum.EasingStyle.Quad,
+            Enum.EasingDirection.Out
+        ),
+        {
+            TextTransparency = 0
+        }
+    )
+
+    local WebsiteIn = TweenService:Create(
+        WebsiteLabel,
+        TweenInfo.new(
+            0.8,
+            Enum.EasingStyle.Quad,
+            Enum.EasingDirection.Out
+        ),
+        {
+            TextTransparency = 0
+        }
+    )
+
+    LogoIn:Play()
+    MapIn:Play()
+    ScriptIn:Play()
+    WebsiteIn:Play()
+
+    LogoIn.Completed:Wait()
+
+    task.wait(1.2)
+
+    local LogoOut = TweenService:Create(
+        Logo,
+        TweenInfo.new(
+            0.8,
+            Enum.EasingStyle.Quad,
+            Enum.EasingDirection.In
+        ),
+        {
+            ImageTransparency = 1,
+            Size = UDim2.fromOffset(180, 180)
+        }
+    )
+
+    local MapOut = TweenService:Create(
+        MapLabel,
+        TweenInfo.new(
+            0.5,
+            Enum.EasingStyle.Quad,
+            Enum.EasingDirection.In
+        ),
+        {
+            TextTransparency = 1
+        }
+    )
+
+    local ScriptOut = TweenService:Create(
+        ScriptLabel,
+        TweenInfo.new(
+            0.5,
+            Enum.EasingStyle.Quad,
+            Enum.EasingDirection.In
+        ),
+        {
+            TextTransparency = 1
+        }
+    )
+
+    local WebsiteOut = TweenService:Create(
+        WebsiteLabel,
+        TweenInfo.new(
+            0.5,
+            Enum.EasingStyle.Quad,
+            Enum.EasingDirection.In
+        ),
+        {
+            TextTransparency = 1
+        }
+    )
+
+    LogoOut:Play()
+    MapOut:Play()
+    ScriptOut:Play()
+    WebsiteOut:Play()
+
+    LogoOut.Completed:Wait()
+
+    local BackgroundOut = TweenService:Create(
+        Frame,
+        TweenInfo.new(
+            0.4,
+            Enum.EasingStyle.Quad,
+            Enum.EasingDirection.In
+        ),
+        {
+            BackgroundTransparency = 1
+        }
+    )
+
+    BackgroundOut:Play()
+    BackgroundOut.Completed:Wait()
+
+    ScreenGui:Destroy()
+
+    task.spawn(function()
+        LoadScript(LOAD_URL)
+    end)
+end
+
+ShowLoader()
