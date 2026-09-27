@@ -22,8 +22,8 @@ local SCRIPTS = {
     },
 
     [4924922222] = {
-        Name = "BoomBox Brookhaven RP",
-        URL = "https://raw.githubusercontent.com/LoaderHub1990/OBF-SCRIPT-ALL/refs/heads/main/F!exozy%20BoomBox%20Brookhaven%20RP"
+        Name = "Brookhaven RP",
+        URL = "https://raw.githubusercontent.com/LoaderHub1990/OBF-SRC-PRO-MAX/refs/heads/main/OBF%20%E0%B8%95%E0%B8%B1%E0%B8%A7%E0%B9%80%E0%B8%A5%E0%B8%B7%E0%B8%AD%E0%B8%81%E0%B8%9A%E0%B8%B8%E0%B9%8A%E0%B8%84"
     },
 
     [537413528] = {
