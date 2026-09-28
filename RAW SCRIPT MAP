@@ -41,6 +41,11 @@ local SCRIPTS = {
     URL = "https://raw.githubusercontent.com/LoaderHub1990/OBF-SCRIPT-ALL/refs/heads/main/Steal%20An%20Egg%20OBF%20V2"
     },
 
+    [124216119978534] = {
+        Name = "Ride A Pet",
+        URL = "https://raw.githubusercontent.com/LoaderHub1990/OBF-SRC-PRO-MAX/refs/heads/main/Ride%20A%20Pet%20%E0%B8%A1%E0%B8%B5%E0%B8%84%E0%B8%B5%E0%B8%A2%E0%B9%8C"
+    },
+
     DEFAULT = {
         Name = "ALL MENU",
         URL = "https://raw.githubusercontent.com/LoaderHub1990/OBF-SCRIPT-ALL/refs/heads/main/ALL%20MENU%20OBF%20V2"
