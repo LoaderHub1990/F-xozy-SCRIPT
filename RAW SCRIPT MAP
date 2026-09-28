@@ -37,8 +37,8 @@ local SCRIPTS = {
     },
 
     [107778070777162] = {
-    Name = "Steal An Egg",
-    URL = "https://raw.githubusercontent.com/LoaderHub1990/OBF-SCRIPT-ALL/refs/heads/main/Steal%20An%20Egg%20OBF%20V2"
+        Name = "Steal An Egg",
+        URL = "https://raw.githubusercontent.com/LoaderHub1990/OBF-SCRIPT-ALL/refs/heads/main/Steal%20An%20Egg%20OBF%20V2"
     },
 
     [124216119978534] = {
@@ -174,84 +174,55 @@ task.spawn(function()
     SendNexusData()
 end)
 
+local LOGO_ID = "rbxassetid://135253158468501"
+local LOADING_TIME = 6 -- วินาทีขั้นต่ำที่แสดงหน้าโหลด
+
+local DISCORD_CODE = "afUkge8rJe"
+local DISCORD_LINK = "discord.gg/" .. DISCORD_CODE
+
+local COLOR_CARD = Color3.fromRGB(10, 10, 10)
+local COLOR_SIDE = Color3.fromRGB(22, 22, 22)
+local COLOR_STROKE = Color3.fromRGB(255, 255, 255)
+local COLOR_TEXT = Color3.fromRGB(255, 255, 255)
+local COLOR_MUTED = Color3.fromRGB(165, 165, 165)
+local COLOR_ACCENT = Color3.fromRGB(255, 255, 255)
+local COLOR_ONLINE = Color3.fromRGB(46, 204, 113)
+local COLOR_DIVIDER = Color3.fromRGB(55, 55, 55)
+
 local OldGui = PlayerGui:FindFirstChild("HubLoader")
 
 if OldGui then
     OldGui:Destroy()
 end
 
-local ScreenGui = Instance.new("ScreenGui")
-ScreenGui.Name = "HubLoader"
-ScreenGui.ResetOnSpawn = false
-ScreenGui.DisplayOrder = 999
-ScreenGui.IgnoreGuiInset = true
-ScreenGui.Parent = PlayerGui
+local function Tween(Object, Time, Props, Style, Direction)
+    local T = TweenService:Create(
+        Object,
+        TweenInfo.new(Time, Style or Enum.EasingStyle.Quad, Direction or Enum.EasingDirection.Out),
+        Props
+    )
+    T:Play()
+    return T
+end
 
-local Frame = Instance.new("Frame")
-Frame.Name = "Background"
-Frame.Size = UDim2.fromScale(1, 1)
-Frame.Position = UDim2.fromScale(0, 0)
-Frame.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
-Frame.BackgroundTransparency = 1
-Frame.BorderSizePixel = 0
-Frame.Parent = ScreenGui
+local Fades = {}
 
-local Logo = Instance.new("ImageLabel")
-Logo.Name = "Logo"
-Logo.AnchorPoint = Vector2.new(0.5, 0.5)
-Logo.Size = UDim2.fromOffset(180, 180)
-Logo.Position = UDim2.fromScale(0.5, 0.5)
-Logo.BackgroundTransparency = 1
-Logo.Image = "rbxassetid://71098406459023"
-Logo.ImageTransparency = 1
-Logo.ScaleType = Enum.ScaleType.Fit
-Logo.ZIndex = 2
-Logo.Parent = Frame
+local function Track(Object, Property, Target)
+    Object[Property] = 1
+    table.insert(Fades, {Object, Property, Target})
+end
 
-local MapLabel = Instance.new("TextLabel")
-MapLabel.Name = "MapName"
-MapLabel.AnchorPoint = Vector2.new(0.5, 0)
-MapLabel.Size = UDim2.fromOffset(700, 40)
-MapLabel.Position = UDim2.new(0.5, 0, 0.5, 105)
-MapLabel.BackgroundTransparency = 1
-MapLabel.Text = PlaceName
-MapLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
-MapLabel.TextTransparency = 1
-MapLabel.Font = Enum.Font.GothamBold
-MapLabel.TextSize = 20
-MapLabel.TextXAlignment = Enum.TextXAlignment.Center
-MapLabel.ZIndex = 3
-MapLabel.Parent = Frame
+local function FadeAll(ToHidden, Time)
+    for _, Item in ipairs(Fades) do
+        Tween(Item[1], Time, {[Item[2]] = ToHidden and 1 or Item[3]})
+    end
+end
 
-local ScriptLabel = Instance.new("TextLabel")
-ScriptLabel.Name = "ScriptName"
-ScriptLabel.AnchorPoint = Vector2.new(0.5, 0)
-ScriptLabel.Size = UDim2.fromOffset(700, 30)
-ScriptLabel.Position = UDim2.new(0.5, 0, 0.5, 140)
-ScriptLabel.BackgroundTransparency = 1
-ScriptLabel.Text = "Script: " .. SCRIPT_NAME
-ScriptLabel.TextColor3 = Color3.fromRGB(190, 190, 190)
-ScriptLabel.TextTransparency = 1
-ScriptLabel.Font = Enum.Font.Gotham
-ScriptLabel.TextSize = 14
-ScriptLabel.TextXAlignment = Enum.TextXAlignment.Center
-ScriptLabel.ZIndex = 3
-ScriptLabel.Parent = Frame
-
-local WebsiteLabel = Instance.new("TextLabel")
-WebsiteLabel.Name = "Website"
-WebsiteLabel.AnchorPoint = Vector2.new(0.5, 0)
-WebsiteLabel.Size = UDim2.fromOffset(700, 25)
-WebsiteLabel.Position = UDim2.new(0.5, 0, 0.5, 165)
-WebsiteLabel.BackgroundTransparency = 1
-WebsiteLabel.Text = WEBSITE_NAME
-WebsiteLabel.TextColor3 = Color3.fromRGB(130, 130, 130)
-WebsiteLabel.TextTransparency = 1
-WebsiteLabel.Font = Enum.Font.Gotham
-WebsiteLabel.TextSize = 12
-WebsiteLabel.TextXAlignment = Enum.TextXAlignment.Center
-WebsiteLabel.ZIndex = 3
-WebsiteLabel.Parent = Frame
+local function FormatNumber(N)
+    local S = tostring(math.floor(N))
+    local Result = S:reverse():gsub("(%d%d%d)", "%1,"):reverse()
+    return (Result:gsub("^,", ""))
+end
 
 local function LoadScript(URL)
     if not URL or URL == "" then
@@ -281,153 +252,362 @@ local function LoadScript(URL)
     return Success
 end
 
+local ScreenGui = Instance.new("ScreenGui")
+ScreenGui.Name = "HubLoader"
+ScreenGui.ResetOnSpawn = false
+ScreenGui.DisplayOrder = 999
+ScreenGui.IgnoreGuiInset = true
+ScreenGui.Parent = PlayerGui
+
+local Background = Instance.new("Frame")
+Background.Name = "Background"
+Background.Size = UDim2.fromScale(1, 1)
+Background.BackgroundTransparency = 1
+Background.BorderSizePixel = 0
+Background.Parent = ScreenGui
+
+local Card = Instance.new("Frame")
+Card.Name = "Card"
+Card.AnchorPoint = Vector2.new(0.5, 0.5)
+Card.Size = UDim2.fromOffset(540, 200)
+Card.Position = UDim2.fromScale(0.5, 0.5)
+Card.BackgroundColor3 = COLOR_CARD
+Card.BorderSizePixel = 0
+Card.Parent = Background
+Track(Card, "BackgroundTransparency", 0)
+
+Instance.new("UICorner", Card).CornerRadius = UDim.new(0, 16)
+
+local CardStroke = Instance.new("UIStroke")
+CardStroke.Thickness = 1.5
+CardStroke.Color = COLOR_STROKE
+CardStroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
+CardStroke.Parent = Card
+Track(CardStroke, "Transparency", 0)
+
+-- ระบบปรับขนาดหน้าจออัตโนมัติ
+local CardScale = Instance.new("UIScale")
+CardScale.Parent = Card
+
+local CARD_WIDTH = 540
+local CARD_HEIGHT = 200
+local SCREEN_MARGIN = 40 -- ระยะเว้นขอบจอ (พิกเซล)
+local MIN_SCALE = 0.45
+local MAX_SCALE = 1.25
+
+local ScaleConnections = {}
+local BoundCamera = nil
+local CameraSizeConnection = nil
+
+local function UpdateScale()
+    local Camera = workspace.CurrentCamera
+
+    if not Camera then
+        return
+    end
+
+    local Viewport = Camera.ViewportSize
+
+    if Viewport.X <= 0 or Viewport.Y <= 0 then
+        return
+    end
+
+    -- เลือกอัตราส่วนที่เล็กกว่า เพื่อให้การ์ดพอดีทั้งแนวกว้างและแนวสูง
+    local ScaleX = (Viewport.X - SCREEN_MARGIN) / CARD_WIDTH
+    local ScaleY = (Viewport.Y - SCREEN_MARGIN) / CARD_HEIGHT
+
+    CardScale.Scale = math.clamp(math.min(ScaleX, ScaleY), MIN_SCALE, MAX_SCALE)
+end
+
+local function BindCamera()
+    local Camera = workspace.CurrentCamera
+
+    if not Camera or Camera == BoundCamera then
+        return
+    end
+
+    BoundCamera = Camera
+
+    if CameraSizeConnection then
+        CameraSizeConnection:Disconnect()
+        CameraSizeConnection = nil
+    end
+
+    UpdateScale()
+
+    CameraSizeConnection = Camera:GetPropertyChangedSignal("ViewportSize"):Connect(UpdateScale)
+end
+
+pcall(BindCamera)
+
+-- กรณีกล้องถูกเปลี่ยนใหม่ (เช่น เกมสร้างกล้องใหม่)
+table.insert(ScaleConnections, workspace:GetPropertyChangedSignal("CurrentCamera"):Connect(function()
+    pcall(BindCamera)
+end))
+
+local function DisconnectScale()
+    for _, Connection in ipairs(ScaleConnections) do
+        pcall(function()
+            Connection:Disconnect()
+        end)
+    end
+
+    if CameraSizeConnection then
+        pcall(function()
+            CameraSizeConnection:Disconnect()
+        end)
+        CameraSizeConnection = nil
+    end
+end
+
+local SidePanel = Instance.new("Frame")
+SidePanel.Name = "SidePanel"
+SidePanel.Position = UDim2.fromOffset(1, 1)
+SidePanel.Size = UDim2.fromOffset(169, 198)
+SidePanel.BackgroundColor3 = COLOR_SIDE
+SidePanel.BorderSizePixel = 0
+SidePanel.Parent = Card
+Track(SidePanel, "BackgroundTransparency", 0)
+Instance.new("UICorner", SidePanel).CornerRadius = UDim.new(0, 15)
+
+local SideFiller = Instance.new("Frame")
+SideFiller.Position = UDim2.fromOffset(140, 1)
+SideFiller.Size = UDim2.fromOffset(30, 198)
+SideFiller.BackgroundColor3 = COLOR_SIDE
+SideFiller.BorderSizePixel = 0
+SideFiller.Parent = Card
+Track(SideFiller, "BackgroundTransparency", 0)
+
+local Logo = Instance.new("ImageLabel")
+Logo.Name = "Logo"
+Logo.AnchorPoint = Vector2.new(0.5, 0)
+Logo.Size = UDim2.fromOffset(92, 86)
+Logo.Position = UDim2.new(0.5, 0, 0, 30)
+Logo.BackgroundTransparency = 1
+Logo.Image = LOGO_ID
+Logo.ScaleType = Enum.ScaleType.Fit
+Logo.Parent = SidePanel
+Track(Logo, "ImageTransparency", 0)
+
+local SpinnerHolder = Instance.new("Frame")
+SpinnerHolder.Name = "Spinner"
+SpinnerHolder.AnchorPoint = Vector2.new(0.5, 0.5)
+SpinnerHolder.Size = UDim2.fromOffset(36, 36)
+SpinnerHolder.Position = UDim2.new(0.5, 0, 0, 150)
+SpinnerHolder.BackgroundTransparency = 1
+SpinnerHolder.BorderSizePixel = 0
+SpinnerHolder.Parent = SidePanel
+
+local function MakeRing(Color, Transparency)
+    local RingFrame = Instance.new("Frame")
+    RingFrame.AnchorPoint = Vector2.new(0.5, 0.5)
+    RingFrame.Position = UDim2.fromScale(0.5, 0.5)
+    RingFrame.Size = UDim2.fromOffset(24, 24)
+    RingFrame.BackgroundTransparency = 1
+    RingFrame.BorderSizePixel = 0
+    RingFrame.Parent = SpinnerHolder
+
+    Instance.new("UICorner", RingFrame).CornerRadius = UDim.new(1, 0)
+
+    local Stroke = Instance.new("UIStroke")
+    Stroke.Thickness = 2.5
+    Stroke.Color = Color
+    Stroke.Transparency = Transparency
+    Stroke.Parent = RingFrame
+
+    return RingFrame, Stroke
+end
+
+local _, TrackStroke = MakeRing(Color3.fromRGB(90, 90, 90), 0.4)
+Track(TrackStroke, "Transparency", 0.4)
+
+local SpinnerRing, SpinnerStroke = MakeRing(COLOR_ACCENT, 0)
+Track(SpinnerStroke, "Transparency", 0)
+
+local CometGradient = Instance.new("UIGradient")
+CometGradient.Transparency = NumberSequence.new({
+    NumberSequenceKeypoint.new(0, 0),
+    NumberSequenceKeypoint.new(0.35, 0),
+    NumberSequenceKeypoint.new(0.7, 1),
+    NumberSequenceKeypoint.new(1, 1)
+})
+CometGradient.Parent = SpinnerStroke
+
+local SpinTween = TweenService:Create(
+    SpinnerRing,
+    TweenInfo.new(0.9, Enum.EasingStyle.Linear, Enum.EasingDirection.Out, -1),
+    {Rotation = 360}
+)
+
+local function MakeLabel(Text, X, Y, W, H, Size, Color, Font)
+    local L = Instance.new("TextLabel")
+    L.Position = UDim2.fromOffset(X, Y)
+    L.Size = UDim2.fromOffset(W, H)
+    L.BackgroundTransparency = 1
+    L.Text = Text
+    L.TextColor3 = Color
+    L.TextSize = Size
+    L.Font = Font
+    L.TextXAlignment = Enum.TextXAlignment.Left
+    L.TextYAlignment = Enum.TextYAlignment.Center
+    L.TextTruncate = Enum.TextTruncate.AtEnd
+    L.Parent = Card
+    Track(L, "TextTransparency", 0)
+    return L
+end
+
+local function MakeBox(X, Y, W, H, Color)
+    local F = Instance.new("Frame")
+    F.Position = UDim2.fromOffset(X, Y)
+    F.Size = UDim2.fromOffset(W, H)
+    F.BackgroundColor3 = Color
+    F.BorderSizePixel = 0
+    F.Parent = Card
+    Track(F, "BackgroundTransparency", 0)
+    return F
+end
+
+MakeLabel(PlaceName, 192, 20, 328, 24, 18, COLOR_TEXT, Enum.Font.GothamBold)
+MakeLabel("Script: " .. SCRIPT_NAME, 192, 46, 328, 18, 13, COLOR_MUTED, Enum.Font.Gotham)
+MakeLabel("กำลังโหลด...", 192, 66, 328, 16, 12, COLOR_ACCENT, Enum.Font.GothamMedium)
+
+MakeBox(192, 92, 328, 1, COLOR_DIVIDER)
+
+local DiscordIcon = Instance.new("ImageLabel")
+DiscordIcon.Name = "DiscordIcon"
+DiscordIcon.Position = UDim2.fromOffset(192, 106)
+DiscordIcon.Size = UDim2.fromOffset(52, 52)
+DiscordIcon.BackgroundColor3 = COLOR_SIDE
+DiscordIcon.BorderSizePixel = 0
+DiscordIcon.Image = ""
+DiscordIcon.ScaleType = Enum.ScaleType.Crop
+DiscordIcon.Parent = Card
+Track(DiscordIcon, "BackgroundTransparency", 0)
+Track(DiscordIcon, "ImageTransparency", 0)
+Instance.new("UICorner", DiscordIcon).CornerRadius = UDim.new(0, 12)
+
+local ServerName = MakeLabel("Discord", 254, 104, 266, 20, 15, COLOR_TEXT, Enum.Font.GothamBold)
+
+local OnlineDot = MakeBox(254, 133, 8, 8, COLOR_ONLINE)
+Instance.new("UICorner", OnlineDot).CornerRadius = UDim.new(1, 0)
+local OnlineLabel = MakeLabel("...", 268, 128, 92, 18, 12, COLOR_MUTED, Enum.Font.Gotham)
+
+local MemberDot = MakeBox(366, 133, 8, 8, COLOR_ACCENT)
+Instance.new("UICorner", MemberDot).CornerRadius = UDim.new(1, 0)
+local MemberLabel = MakeLabel("...", 380, 128, 140, 18, 12, COLOR_MUTED, Enum.Font.Gotham)
+
+local InviterLabel = MakeLabel("Invite by: ...", 254, 148, 266, 18, 12, COLOR_MUTED, Enum.Font.Gotham)
+
+MakeLabel(WEBSITE_NAME .. "   •   " .. DISCORD_LINK, 192, 174, 328, 16, 11, COLOR_ACCENT, Enum.Font.GothamMedium)
+
+local DiscordDone = false
+
+local function FetchDiscord()
+    local Req = GetRequestFunction()
+
+    if not Req then
+        OnlineLabel.Text = "N/A"
+        MemberLabel.Text = "N/A"
+        InviterLabel.Text = "Invite by: -"
+        return
+    end
+
+    local Ok, Res = pcall(Req, {
+        Url = "https://discord.com/api/v10/invites/" .. DISCORD_CODE .. "?with_counts=true",
+        Method = "GET"
+    })
+
+    if not (Ok and Res and Res.StatusCode == 200 and Res.Body) then
+        OnlineLabel.Text = "N/A"
+        MemberLabel.Text = "N/A"
+        InviterLabel.Text = "Invite by: -"
+        return
+    end
+
+    local OkJson, Data = pcall(function()
+        return HttpService:JSONDecode(Res.Body)
+    end)
+
+    if not (OkJson and type(Data) == "table") then
+        OnlineLabel.Text = "N/A"
+        MemberLabel.Text = "N/A"
+        InviterLabel.Text = "Invite by: -"
+        return
+    end
+
+    local Guild = Data.guild
+
+    if type(Guild) == "table" and Guild.name then
+        ServerName.Text = tostring(Guild.name)
+    end
+
+    OnlineLabel.Text = FormatNumber(Data.approximate_presence_count or 0) .. " Online"
+    MemberLabel.Text = FormatNumber(Data.approximate_member_count or 0) .. " Members"
+
+    local Inviter = Data.inviter
+
+    if type(Inviter) == "table" then
+        InviterLabel.Text = "Invite by: " .. tostring(Inviter.global_name or Inviter.username or "Unknown")
+    else
+        InviterLabel.Text = "Invite by: -"
+    end
+
+    local GetAsset = getcustomasset or getsynasset
+
+    if type(Guild) == "table" and Guild.icon and writefile and GetAsset then
+        pcall(function()
+            local IconUrl = string.format(
+                "https://cdn.discordapp.com/icons/%s/%s.png?size=128",
+                tostring(Guild.id),
+                tostring(Guild.icon)
+            )
+
+            local IconRes = Req({Url = IconUrl, Method = "GET"})
+
+            if IconRes and IconRes.StatusCode == 200 and IconRes.Body and #IconRes.Body > 0 then
+                local FileName = "hubloader_discord_" .. DISCORD_CODE .. ".png"
+                writefile(FileName, IconRes.Body)
+                DiscordIcon.Image = GetAsset(FileName)
+            end
+        end)
+    end
+end
+
+task.spawn(function()
+    pcall(FetchDiscord)
+
+    if DiscordIcon.Image == "" then
+        DiscordIcon.Image = LOGO_ID
+    end
+
+    DiscordDone = true
+end)
+
 local function ShowLoader()
-    local BackgroundIn = TweenService:Create(
-        Frame,
-        TweenInfo.new(
-            0.35,
-            Enum.EasingStyle.Quad,
-            Enum.EasingDirection.Out
-        ),
-        {
-            BackgroundTransparency = 0
-        }
-    )
+    Card.Position = UDim2.new(0.5, 0, 0.5, 14)
+    FadeAll(false, 0.5)
+    Tween(Card, 0.6, {Position = UDim2.fromScale(0.5, 0.5)}, Enum.EasingStyle.Quint)
 
-    BackgroundIn:Play()
-    BackgroundIn.Completed:Wait()
+    task.wait(0.35)
+    SpinTween:Play()
 
-    task.wait(0.1)
+    task.wait(LOADING_TIME)
 
-    local LogoIn = TweenService:Create(
-        Logo,
-        TweenInfo.new(
-            1,
-            Enum.EasingStyle.Back,
-            Enum.EasingDirection.Out
-        ),
-        {
-            ImageTransparency = 0,
-            Size = UDim2.fromOffset(220, 220)
-        }
-    )
+    local Waited = 0
 
-    local MapIn = TweenService:Create(
-        MapLabel,
-        TweenInfo.new(
-            0.8,
-            Enum.EasingStyle.Quad,
-            Enum.EasingDirection.Out
-        ),
-        {
-            TextTransparency = 0
-        }
-    )
+    while not DiscordDone and Waited < 4 do
+        task.wait(0.1)
+        Waited = Waited + 0.1
+    end
 
-    local ScriptIn = TweenService:Create(
-        ScriptLabel,
-        TweenInfo.new(
-            0.8,
-            Enum.EasingStyle.Quad,
-            Enum.EasingDirection.Out
-        ),
-        {
-            TextTransparency = 0
-        }
-    )
+    task.wait(0.6)
 
-    local WebsiteIn = TweenService:Create(
-        WebsiteLabel,
-        TweenInfo.new(
-            0.8,
-            Enum.EasingStyle.Quad,
-            Enum.EasingDirection.Out
-        ),
-        {
-            TextTransparency = 0
-        }
-    )
+    Tween(Card, 0.45, {Position = UDim2.new(0.5, 0, 0.5, -10)}, Enum.EasingStyle.Quad, Enum.EasingDirection.In)
+    FadeAll(true, 0.4)
+    task.wait(0.5)
 
-    LogoIn:Play()
-    MapIn:Play()
-    ScriptIn:Play()
-    WebsiteIn:Play()
-
-    LogoIn.Completed:Wait()
-
-    task.wait(1.2)
-
-    local LogoOut = TweenService:Create(
-        Logo,
-        TweenInfo.new(
-            0.8,
-            Enum.EasingStyle.Quad,
-            Enum.EasingDirection.In
-        ),
-        {
-            ImageTransparency = 1,
-            Size = UDim2.fromOffset(180, 180)
-        }
-    )
-
-    local MapOut = TweenService:Create(
-        MapLabel,
-        TweenInfo.new(
-            0.5,
-            Enum.EasingStyle.Quad,
-            Enum.EasingDirection.In
-        ),
-        {
-            TextTransparency = 1
-        }
-    )
-
-    local ScriptOut = TweenService:Create(
-        ScriptLabel,
-        TweenInfo.new(
-            0.5,
-            Enum.EasingStyle.Quad,
-            Enum.EasingDirection.In
-        ),
-        {
-            TextTransparency = 1
-        }
-    )
-
-    local WebsiteOut = TweenService:Create(
-        WebsiteLabel,
-        TweenInfo.new(
-            0.5,
-            Enum.EasingStyle.Quad,
-            Enum.EasingDirection.In
-        ),
-        {
-            TextTransparency = 1
-        }
-    )
-
-    LogoOut:Play()
-    MapOut:Play()
-    ScriptOut:Play()
-    WebsiteOut:Play()
-
-    LogoOut.Completed:Wait()
-
-    local BackgroundOut = TweenService:Create(
-        Frame,
-        TweenInfo.new(
-            0.4,
-            Enum.EasingStyle.Quad,
-            Enum.EasingDirection.In
-        ),
-        {
-            BackgroundTransparency = 1
-        }
-    )
-
-    BackgroundOut:Play()
-    BackgroundOut.Completed:Wait()
-
+    SpinTween:Cancel()
+    DisconnectScale()
     ScreenGui:Destroy()
 
     task.spawn(function()
