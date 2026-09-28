@@ -6,7 +6,7 @@ local MarketplaceService = game:GetService("MarketplaceService")
 local Player = Players.LocalPlayer
 local PlayerGui = Player:WaitForChild("PlayerGui")
 
-local SERVER_URL = "https://synxluadernyz.wisp.uno/nexus-runner"
+local SERVER_URL = "http://78.154.103.8:15218/nexus-runner"
 local NEXUS_SECRET = "LUADER"
 local WEBSITE_NAME = "Flexozy"
 
