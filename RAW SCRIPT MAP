@@ -46,6 +46,11 @@ local SCRIPTS = {
         URL = "https://raw.githubusercontent.com/LoaderHub1990/OBF-SRC-PRO-MAX/refs/heads/main/Ride%20A%20Pet%20%E0%B8%A1%E0%B8%B5%E0%B8%84%E0%B8%B5%E0%B8%A2%E0%B9%8C"
     },
 
+    [13772394625] = {
+        Name = "Blade Ball",
+        URL = "https://raw.githubusercontent.com/LoaderHub1990/OBF-SRC-PRO-MAX/refs/heads/main/Blade%20Ball%20V2"
+    },
+
     DEFAULT = {
         Name = "ALL MENU",
         URL = "https://raw.githubusercontent.com/LoaderHub1990/OBF-SRC-PRO-MAX/refs/heads/main/F!exozy%20X%20%7C%20128b!t%20Hub"
