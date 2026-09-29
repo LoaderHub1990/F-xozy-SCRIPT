@@ -46,7 +46,7 @@ local SCRIPTS = {
         URL = "https://raw.githubusercontent.com/LoaderHub1990/OBF-SRC-PRO-MAX/refs/heads/main/Ride%20A%20Pet%20%E0%B8%A1%E0%B8%B5%E0%B8%84%E0%B8%B5%E0%B8%A2%E0%B9%8C"
     },
 
-    [13772394625] = {
+    [16281300371] = {
         Name = "Blade Ball",
         URL = "https://raw.githubusercontent.com/LoaderHub1990/OBF-SRC-PRO-MAX/refs/heads/main/Blade%20Ball%20V2"
     },
