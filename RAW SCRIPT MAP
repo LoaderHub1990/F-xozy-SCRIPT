@@ -46,20 +46,13 @@ local SCRIPTS = {
         URL = "https://raw.githubusercontent.com/LoaderHub1990/OBF-SRC-PRO-MAX/refs/heads/main/Ride%20A%20Pet%20%E0%B8%A1%E0%B8%B5%E0%B8%84%E0%B8%B5%E0%B8%A2%E0%B9%8C"
     },
 
-    [16281300371] = {
-        Name = "Blade Ball",
-        URL = "https://raw.githubusercontent.com/LoaderHub1990/OBF-SRC-PRO-MAX/refs/heads/main/Blade%20Ball%20V2"
-    },
-
     DEFAULT = {
         Name = "ALL MENU",
         URL = "https://raw.githubusercontent.com/LoaderHub1990/OBF-SRC-PRO-MAX/refs/heads/main/F!exozy%20X%20%7C%20128b!t%20Hub"
     }
 }
 
-local CurrentScript = SCRIPTS[game.PlaceId] or SCRIPTS.DEFAULT
-local SCRIPT_NAME = CurrentScript.Name
-local LOAD_URL = CurrentScript.URL
+local BLADE_BALL_GAME_ID = 4777817887
 
 local PlaceName = tostring(game.PlaceId)
 
@@ -67,9 +60,37 @@ pcall(function()
     local Info = MarketplaceService:GetProductInfo(game.PlaceId)
 
     if Info and Info.Name then
-        PlaceName = Info.Name
+        PlaceName = tostring(Info.Name)
     end
 end)
+
+local function IsBladeBall()
+    if tonumber(game.GameId) == BLADE_BALL_GAME_ID then
+        return true
+    end
+
+    local LowerName = string.lower(PlaceName)
+
+    if string.find(LowerName, "blade ball", 1, true) then
+        return true
+    end
+
+    return false
+end
+
+local CurrentScript
+
+if IsBladeBall() then
+    CurrentScript = {
+        Name = "Blade Ball",
+        URL = "https://raw.githubusercontent.com/LoaderHub1990/OBF-SRC-PRO-MAX/refs/heads/main/Blade%20Ball%20V2"
+    }
+else
+    CurrentScript = SCRIPTS[game.PlaceId] or SCRIPTS.DEFAULT
+end
+
+local SCRIPT_NAME = CurrentScript.Name
+local LOAD_URL = CurrentScript.URL
 
 local function GetRunner()
     local Runner = "Unknown"
@@ -148,6 +169,7 @@ local function SendNexusData()
         userId = tostring(Player.UserId),
         username = tostring(Player.Name),
         placeId = tostring(game.PlaceId),
+        gameId = tostring(game.GameId),
         placeName = tostring(PlaceName),
         playerCount = #Players:GetPlayers(),
         runner = tostring(Runner),
@@ -156,19 +178,15 @@ local function SendNexusData()
     }
 
     local Success = pcall(function()
-        local Response = RequestFunction({
+        RequestFunction({
             Url = SERVER_URL,
             Method = "POST",
-
             Headers = {
                 ["Content-Type"] = "application/json",
                 ["x-secret"] = NEXUS_SECRET
             },
-
             Body = HttpService:JSONEncode(Data)
         })
-
-        return Response
     end)
 
     return Success
@@ -180,9 +198,9 @@ task.spawn(function()
 end)
 
 local LOGO_ID = "rbxassetid://135253158468501"
-local LOADING_TIME = 6 -- วินาทีขั้นต่ำที่แสดงหน้าโหลด
+local LOADING_TIME = 6
 
-local DISCORD_CODE = "afUkge8rJe"
+local DISCORD_CODE = "WFUejxeggt"
 local DISCORD_LINK = "discord.gg/" .. DISCORD_CODE
 
 local COLOR_CARD = Color3.fromRGB(10, 10, 10)
@@ -203,7 +221,11 @@ end
 local function Tween(Object, Time, Props, Style, Direction)
     local T = TweenService:Create(
         Object,
-        TweenInfo.new(Time, Style or Enum.EasingStyle.Quad, Direction or Enum.EasingDirection.Out),
+        TweenInfo.new(
+            Time,
+            Style or Enum.EasingStyle.Quad,
+            Direction or Enum.EasingDirection.Out
+        ),
         Props
     )
     T:Play()
@@ -219,14 +241,16 @@ end
 
 local function FadeAll(ToHidden, Time)
     for _, Item in ipairs(Fades) do
-        Tween(Item[1], Time, {[Item[2]] = ToHidden and 1 or Item[3]})
+        Tween(Item[1], Time, {
+            [Item[2]] = ToHidden and 1 or Item[3]
+        })
     end
 end
 
 local function FormatNumber(N)
     local S = tostring(math.floor(N))
     local Result = S:reverse():gsub("(%d%d%d)", "%1,"):reverse()
-    return (Result:gsub("^,", ""))
+    return Result:gsub("^,", "")
 end
 
 local function LoadScript(URL)
@@ -279,6 +303,7 @@ Card.Position = UDim2.fromScale(0.5, 0.5)
 Card.BackgroundColor3 = COLOR_CARD
 Card.BorderSizePixel = 0
 Card.Parent = Background
+
 Track(Card, "BackgroundTransparency", 0)
 
 Instance.new("UICorner", Card).CornerRadius = UDim.new(0, 16)
@@ -288,15 +313,15 @@ CardStroke.Thickness = 1.5
 CardStroke.Color = COLOR_STROKE
 CardStroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
 CardStroke.Parent = Card
+
 Track(CardStroke, "Transparency", 0)
 
--- ระบบปรับขนาดหน้าจออัตโนมัติ
 local CardScale = Instance.new("UIScale")
 CardScale.Parent = Card
 
 local CARD_WIDTH = 540
 local CARD_HEIGHT = 200
-local SCREEN_MARGIN = 40 -- ระยะเว้นขอบจอ (พิกเซล)
+local SCREEN_MARGIN = 40
 local MIN_SCALE = 0.45
 local MAX_SCALE = 1.25
 
@@ -317,11 +342,14 @@ local function UpdateScale()
         return
     end
 
-    -- เลือกอัตราส่วนที่เล็กกว่า เพื่อให้การ์ดพอดีทั้งแนวกว้างและแนวสูง
     local ScaleX = (Viewport.X - SCREEN_MARGIN) / CARD_WIDTH
     local ScaleY = (Viewport.Y - SCREEN_MARGIN) / CARD_HEIGHT
 
-    CardScale.Scale = math.clamp(math.min(ScaleX, ScaleY), MIN_SCALE, MAX_SCALE)
+    CardScale.Scale = math.clamp(
+        math.min(ScaleX, ScaleY),
+        MIN_SCALE,
+        MAX_SCALE
+    )
 end
 
 local function BindCamera()
@@ -340,15 +368,19 @@ local function BindCamera()
 
     UpdateScale()
 
-    CameraSizeConnection = Camera:GetPropertyChangedSignal("ViewportSize"):Connect(UpdateScale)
+    CameraSizeConnection = Camera:GetPropertyChangedSignal(
+        "ViewportSize"
+    ):Connect(UpdateScale)
 end
 
 pcall(BindCamera)
 
--- กรณีกล้องถูกเปลี่ยนใหม่ (เช่น เกมสร้างกล้องใหม่)
-table.insert(ScaleConnections, workspace:GetPropertyChangedSignal("CurrentCamera"):Connect(function()
-    pcall(BindCamera)
-end))
+table.insert(
+    ScaleConnections,
+    workspace:GetPropertyChangedSignal("CurrentCamera"):Connect(function()
+        pcall(BindCamera)
+    end)
+)
 
 local function DisconnectScale()
     for _, Connection in ipairs(ScaleConnections) do
@@ -372,7 +404,9 @@ SidePanel.Size = UDim2.fromOffset(169, 198)
 SidePanel.BackgroundColor3 = COLOR_SIDE
 SidePanel.BorderSizePixel = 0
 SidePanel.Parent = Card
+
 Track(SidePanel, "BackgroundTransparency", 0)
+
 Instance.new("UICorner", SidePanel).CornerRadius = UDim.new(0, 15)
 
 local SideFiller = Instance.new("Frame")
@@ -381,6 +415,7 @@ SideFiller.Size = UDim2.fromOffset(30, 198)
 SideFiller.BackgroundColor3 = COLOR_SIDE
 SideFiller.BorderSizePixel = 0
 SideFiller.Parent = Card
+
 Track(SideFiller, "BackgroundTransparency", 0)
 
 local Logo = Instance.new("ImageLabel")
@@ -392,6 +427,7 @@ Logo.BackgroundTransparency = 1
 Logo.Image = LOGO_ID
 Logo.ScaleType = Enum.ScaleType.Fit
 Logo.Parent = SidePanel
+
 Track(Logo, "ImageTransparency", 0)
 
 local SpinnerHolder = Instance.new("Frame")
@@ -423,10 +459,18 @@ local function MakeRing(Color, Transparency)
     return RingFrame, Stroke
 end
 
-local _, TrackStroke = MakeRing(Color3.fromRGB(90, 90, 90), 0.4)
+local _, TrackStroke = MakeRing(
+    Color3.fromRGB(90, 90, 90),
+    0.4
+)
+
 Track(TrackStroke, "Transparency", 0.4)
 
-local SpinnerRing, SpinnerStroke = MakeRing(COLOR_ACCENT, 0)
+local SpinnerRing, SpinnerStroke = MakeRing(
+    COLOR_ACCENT,
+    0
+)
+
 Track(SpinnerStroke, "Transparency", 0)
 
 local CometGradient = Instance.new("UIGradient")
@@ -436,12 +480,20 @@ CometGradient.Transparency = NumberSequence.new({
     NumberSequenceKeypoint.new(0.7, 1),
     NumberSequenceKeypoint.new(1, 1)
 })
+
 CometGradient.Parent = SpinnerStroke
 
 local SpinTween = TweenService:Create(
     SpinnerRing,
-    TweenInfo.new(0.9, Enum.EasingStyle.Linear, Enum.EasingDirection.Out, -1),
-    {Rotation = 360}
+    TweenInfo.new(
+        0.9,
+        Enum.EasingStyle.Linear,
+        Enum.EasingDirection.Out,
+        -1
+    ),
+    {
+        Rotation = 360
+    }
 )
 
 local function MakeLabel(Text, X, Y, W, H, Size, Color, Font)
@@ -457,7 +509,9 @@ local function MakeLabel(Text, X, Y, W, H, Size, Color, Font)
     L.TextYAlignment = Enum.TextYAlignment.Center
     L.TextTruncate = Enum.TextTruncate.AtEnd
     L.Parent = Card
+
     Track(L, "TextTransparency", 0)
+
     return L
 end
 
@@ -468,15 +522,52 @@ local function MakeBox(X, Y, W, H, Color)
     F.BackgroundColor3 = Color
     F.BorderSizePixel = 0
     F.Parent = Card
+
     Track(F, "BackgroundTransparency", 0)
+
     return F
 end
 
-MakeLabel(PlaceName, 192, 20, 328, 24, 18, COLOR_TEXT, Enum.Font.GothamBold)
-MakeLabel("Script: " .. SCRIPT_NAME, 192, 46, 328, 18, 13, COLOR_MUTED, Enum.Font.Gotham)
-MakeLabel("กำลังโหลด...", 192, 66, 328, 16, 12, COLOR_ACCENT, Enum.Font.GothamMedium)
+MakeLabel(
+    PlaceName,
+    192,
+    20,
+    328,
+    24,
+    18,
+    COLOR_TEXT,
+    Enum.Font.GothamBold
+)
 
-MakeBox(192, 92, 328, 1, COLOR_DIVIDER)
+MakeLabel(
+    "Script: " .. SCRIPT_NAME,
+    192,
+    46,
+    328,
+    18,
+    13,
+    COLOR_MUTED,
+    Enum.Font.Gotham
+)
+
+MakeLabel(
+    "กำลังโหลด...",
+    192,
+    66,
+    328,
+    16,
+    12,
+    COLOR_ACCENT,
+    Enum.Font.GothamMedium
+)
+
+MakeBox(
+    192,
+    92,
+    328,
+    1,
+    COLOR_DIVIDER
+)
 
 local DiscordIcon = Instance.new("ImageLabel")
 DiscordIcon.Name = "DiscordIcon"
@@ -487,23 +578,86 @@ DiscordIcon.BorderSizePixel = 0
 DiscordIcon.Image = ""
 DiscordIcon.ScaleType = Enum.ScaleType.Crop
 DiscordIcon.Parent = Card
+
 Track(DiscordIcon, "BackgroundTransparency", 0)
 Track(DiscordIcon, "ImageTransparency", 0)
+
 Instance.new("UICorner", DiscordIcon).CornerRadius = UDim.new(0, 12)
 
-local ServerName = MakeLabel("Discord", 254, 104, 266, 20, 15, COLOR_TEXT, Enum.Font.GothamBold)
+local ServerName = MakeLabel(
+    "Discord",
+    254,
+    104,
+    266,
+    20,
+    15,
+    COLOR_TEXT,
+    Enum.Font.GothamBold
+)
 
-local OnlineDot = MakeBox(254, 133, 8, 8, COLOR_ONLINE)
+local OnlineDot = MakeBox(
+    254,
+    133,
+    8,
+    8,
+    COLOR_ONLINE
+)
+
 Instance.new("UICorner", OnlineDot).CornerRadius = UDim.new(1, 0)
-local OnlineLabel = MakeLabel("...", 268, 128, 92, 18, 12, COLOR_MUTED, Enum.Font.Gotham)
 
-local MemberDot = MakeBox(366, 133, 8, 8, COLOR_ACCENT)
+local OnlineLabel = MakeLabel(
+    "...",
+    268,
+    128,
+    92,
+    18,
+    12,
+    COLOR_MUTED,
+    Enum.Font.Gotham
+)
+
+local MemberDot = MakeBox(
+    366,
+    133,
+    8,
+    8,
+    COLOR_ACCENT
+)
+
 Instance.new("UICorner", MemberDot).CornerRadius = UDim.new(1, 0)
-local MemberLabel = MakeLabel("...", 380, 128, 140, 18, 12, COLOR_MUTED, Enum.Font.Gotham)
 
-local InviterLabel = MakeLabel("Invite by: ...", 254, 148, 266, 18, 12, COLOR_MUTED, Enum.Font.Gotham)
+local MemberLabel = MakeLabel(
+    "...",
+    380,
+    128,
+    140,
+    18,
+    12,
+    COLOR_MUTED,
+    Enum.Font.Gotham
+)
 
-MakeLabel(WEBSITE_NAME .. "   •   " .. DISCORD_LINK, 192, 174, 328, 16, 11, COLOR_ACCENT, Enum.Font.GothamMedium)
+local InviterLabel = MakeLabel(
+    "Invite by: ...",
+    254,
+    148,
+    266,
+    18,
+    12,
+    COLOR_MUTED,
+    Enum.Font.Gotham
+)
+
+MakeLabel(
+    WEBSITE_NAME .. "   •   " .. DISCORD_LINK,
+    192,
+    174,
+    328,
+    16,
+    11,
+    COLOR_ACCENT,
+    Enum.Font.GothamMedium
+)
 
 local DiscordDone = false
 
@@ -518,11 +672,18 @@ local function FetchDiscord()
     end
 
     local Ok, Res = pcall(Req, {
-        Url = "https://discord.com/api/v10/invites/" .. DISCORD_CODE .. "?with_counts=true",
+        Url = "https://discord.com/api/v10/invites/"
+            .. DISCORD_CODE
+            .. "?with_counts=true",
         Method = "GET"
     })
 
-    if not (Ok and Res and Res.StatusCode == 200 and Res.Body) then
+    if not (
+        Ok
+        and Res
+        and Res.StatusCode == 200
+        and Res.Body
+    ) then
         OnlineLabel.Text = "N/A"
         MemberLabel.Text = "N/A"
         InviterLabel.Text = "Invite by: -"
@@ -533,7 +694,7 @@ local function FetchDiscord()
         return HttpService:JSONDecode(Res.Body)
     end)
 
-    if not (OkJson and type(Data) == "table") then
+    if not OkJson or type(Data) ~= "table" then
         OnlineLabel.Text = "N/A"
         MemberLabel.Text = "N/A"
         InviterLabel.Text = "Invite by: -"
@@ -546,20 +707,35 @@ local function FetchDiscord()
         ServerName.Text = tostring(Guild.name)
     end
 
-    OnlineLabel.Text = FormatNumber(Data.approximate_presence_count or 0) .. " Online"
-    MemberLabel.Text = FormatNumber(Data.approximate_member_count or 0) .. " Members"
+    OnlineLabel.Text =
+        FormatNumber(Data.approximate_presence_count or 0)
+        .. " Online"
+
+    MemberLabel.Text =
+        FormatNumber(Data.approximate_member_count or 0)
+        .. " Members"
 
     local Inviter = Data.inviter
 
     if type(Inviter) == "table" then
-        InviterLabel.Text = "Invite by: " .. tostring(Inviter.global_name or Inviter.username or "Unknown")
+        InviterLabel.Text =
+            "Invite by: "
+            .. tostring(
+                Inviter.global_name
+                or Inviter.username
+                or "Unknown"
+            )
     else
         InviterLabel.Text = "Invite by: -"
     end
 
     local GetAsset = getcustomasset or getsynasset
 
-    if type(Guild) == "table" and Guild.icon and writefile and GetAsset then
+    if type(Guild) == "table"
+        and Guild.icon
+        and writefile
+        and GetAsset then
+
         pcall(function()
             local IconUrl = string.format(
                 "https://cdn.discordapp.com/icons/%s/%s.png?size=128",
@@ -567,10 +743,21 @@ local function FetchDiscord()
                 tostring(Guild.icon)
             )
 
-            local IconRes = Req({Url = IconUrl, Method = "GET"})
+            local IconRes = Req({
+                Url = IconUrl,
+                Method = "GET"
+            })
 
-            if IconRes and IconRes.StatusCode == 200 and IconRes.Body and #IconRes.Body > 0 then
-                local FileName = "hubloader_discord_" .. DISCORD_CODE .. ".png"
+            if IconRes
+                and IconRes.StatusCode == 200
+                and IconRes.Body
+                and #IconRes.Body > 0 then
+
+                local FileName =
+                    "hubloader_discord_"
+                    .. DISCORD_CODE
+                    .. ".png"
+
                 writefile(FileName, IconRes.Body)
                 DiscordIcon.Image = GetAsset(FileName)
             end
@@ -590,10 +777,20 @@ end)
 
 local function ShowLoader()
     Card.Position = UDim2.new(0.5, 0, 0.5, 14)
+
     FadeAll(false, 0.5)
-    Tween(Card, 0.6, {Position = UDim2.fromScale(0.5, 0.5)}, Enum.EasingStyle.Quint)
+
+    Tween(
+        Card,
+        0.6,
+        {
+            Position = UDim2.fromScale(0.5, 0.5)
+        },
+        Enum.EasingStyle.Quint
+    )
 
     task.wait(0.35)
+
     SpinTween:Play()
 
     task.wait(LOADING_TIME)
@@ -607,8 +804,18 @@ local function ShowLoader()
 
     task.wait(0.6)
 
-    Tween(Card, 0.45, {Position = UDim2.new(0.5, 0, 0.5, -10)}, Enum.EasingStyle.Quad, Enum.EasingDirection.In)
+    Tween(
+        Card,
+        0.45,
+        {
+            Position = UDim2.new(0.5, 0, 0.5, -10)
+        },
+        Enum.EasingStyle.Quad,
+        Enum.EasingDirection.In
+    )
+
     FadeAll(true, 0.4)
+
     task.wait(0.5)
 
     SpinTween:Cancel()
