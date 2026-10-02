@@ -64,7 +64,7 @@ local SCRIPTS = {
 
 local BLADE_BALL_GAME_ID = 4777817887
 
-local PlaceName = tostring(game.PlaceId)
+local PlaceName = tostring(game.Name or game.PlaceId)
 
 pcall(function()
     local Info = MarketplaceService:GetProductInfo(game.PlaceId)
@@ -81,7 +81,17 @@ local function IsBladeBall()
 
     local LowerName = string.lower(PlaceName)
 
-    if string.find(LowerName, "blade ball", 1, true) then
+    return string.find(LowerName, "blade ball", 1, true) ~= nil
+end
+
+local function IsBlockSpin()
+    local LowerName = string.lower(PlaceName)
+
+    if string.find(LowerName, "blockspin", 1, true) then
+        return true
+    end
+
+    if string.find(LowerName, "block spin", 1, true) then
         return true
     end
 
@@ -94,6 +104,11 @@ if IsBladeBall() then
     CurrentScript = {
         Name = "Blade Ball",
         URL = "https://raw.githubusercontent.com/LoaderHub1990/OBF-SRC-PRO-MAX/refs/heads/main/Blade%20Ball%20V2"
+    }
+elseif IsBlockSpin() then
+    CurrentScript = {
+        Name = "BlockSpin 🔪",
+        URL = "https://raw.githubusercontent.com/LoaderHub1990/OBF-SRC-PRO-MAX/refs/heads/main/Blockspin"
     }
 else
     CurrentScript = SCRIPTS[game.PlaceId] or SCRIPTS.DEFAULT
@@ -238,6 +253,7 @@ local function Tween(Object, Time, Props, Style, Direction)
         ),
         Props
     )
+
     T:Play()
     return T
 end
@@ -403,6 +419,7 @@ local function DisconnectScale()
         pcall(function()
             CameraSizeConnection:Disconnect()
         end)
+
         CameraSizeConnection = nil
     end
 end
