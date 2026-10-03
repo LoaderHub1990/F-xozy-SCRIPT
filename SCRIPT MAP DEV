@@ -61,6 +61,11 @@ local SCRIPTS = {
         URL = "https://raw.githubusercontent.com/LoaderHub1990/OBF-SRC-PRO-MAX/refs/heads/main/LUCKY%20BLOCKS"
     },
 
+    [79602128065352] = {
+        Name = "Doomspire Brickbattle",
+        URL = "https://raw.githubusercontent.com/LoaderHub1990/OBF-SRC-PRO-MAX/refs/heads/main/Doomspire%20Brickbattle"
+    },
+
     DEFAULT = {
         Name = "ALL MENU",
         URL = "https://raw.githubusercontent.com/LoaderHub1990/OBF-SRC-PRO-MAX/refs/heads/main/F!exozy%20X%20%7C%20128b!t%20Hub"
