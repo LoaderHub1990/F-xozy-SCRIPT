@@ -56,6 +56,11 @@ local SCRIPTS = {
         URL = "https://raw.githubusercontent.com/LoaderHub1990/OBF-SRC-PRO-MAX/refs/heads/main/Rivals"
     },
 
+    [662417684] = {
+        Name = "LUCKY BLOCKS",
+        URL = "https://raw.githubusercontent.com/LoaderHub1990/OBF-SRC-PRO-MAX/refs/heads/main/LUCKY%20BLOCKS"
+    },
+
     DEFAULT = {
         Name = "ALL MENU",
         URL = "https://raw.githubusercontent.com/LoaderHub1990/OBF-SRC-PRO-MAX/refs/heads/main/F!exozy%20X%20%7C%20128b!t%20Hub"
